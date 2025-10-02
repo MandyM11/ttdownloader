@@ -1,6 +1,5 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 import requests
-import os
 
 app = Flask(__name__)
 
@@ -13,16 +12,16 @@ def index():
 
         try:
             response = requests.get(url, stream=True)
-            save_path = os.path.join("app/static", "video.mp4")
-            with open(save_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=1024):
-                    if chunk:
-                        f.write(chunk)
-            return "✅ Video descargado correctamente"
+            return Response(
+                response.iter_content(chunk_size=1024),
+                content_type=response.headers.get("content-type", "video/mp4"),
+                headers={"Content-Disposition": "attachment; filename=video.mp4"}
+            )
         except Exception as e:
             return f"⚠️ Ocurrió un error: {e}"
 
     return render_template("index.html")
+
 
 
 
